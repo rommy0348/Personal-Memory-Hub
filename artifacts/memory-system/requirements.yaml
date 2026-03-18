@@ -1,0 +1,19 @@
+packages:
+  "framer-motion": "For premium glassmorphism transitions and layout animations"
+  "date-fns": "For formatting chat timestamps and memory dates beautifully"
+  "clsx": "Utility for constructing className strings conditionally"
+  "tailwind-merge": "Utility for merging tailwind classes safely"
+  "lucide-react": "Beautiful consistent iconography"
+
+images:
+  - path: "artifacts/memory-system/public/images/empty-chat.png"
+    description: "Abstract 3D glassmorphic geometric shapes floating in a dark deep navy and purple gradient void, clean, highly aesthetic, minimalist"
+    aspect_ratio: "16:9"
+  - path: "artifacts/memory-system/public/images/avatar.png"
+    description: "Clean minimalist 3D stylized robot face icon, futuristic, glowing purple eyes, dark background"
+    aspect_ratio: "1:1"
+
+notes:
+  - "The app uses React Query hooks exported from @workspace/api-client-react"
+  - "Using a custom AppContext for local UI state (selected folder, library type)"
+  - "App handles missing historical usedMemories gracefully by storing them locally for the active session"

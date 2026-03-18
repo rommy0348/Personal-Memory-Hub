@@ -1,0 +1,565 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: AI Memory Management System API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: folders
+    description: Folder management
+  - name: memories
+    description: Memory card management
+  - name: ai
+    description: AI services
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /folders:
+    get:
+      operationId: listFolders
+      tags: [folders]
+      summary: List all folders
+      responses:
+        "200":
+          description: List of folders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Folder"
+    post:
+      operationId: createFolder
+      tags: [folders]
+      summary: Create a folder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFolderRequest"
+      responses:
+        "201":
+          description: Created folder
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Folder"
+
+  /folders/{folderId}:
+    get:
+      operationId: getFolder
+      tags: [folders]
+      summary: Get a folder
+      parameters:
+        - name: folderId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Folder
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Folder"
+    put:
+      operationId: updateFolder
+      tags: [folders]
+      summary: Update a folder
+      parameters:
+        - name: folderId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateFolderRequest"
+      responses:
+        "200":
+          description: Updated folder
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Folder"
+    delete:
+      operationId: deleteFolder
+      tags: [folders]
+      summary: Delete a folder
+      parameters:
+        - name: folderId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /memories:
+    get:
+      operationId: listMemories
+      tags: [memories]
+      summary: List memories
+      parameters:
+        - name: folderId
+          in: query
+          schema:
+            type: integer
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: libraryType
+          in: query
+          schema:
+            type: string
+            enum: [memory, plan, material]
+      responses:
+        "200":
+          description: List of memory cards
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MemoryCard"
+    post:
+      operationId: createMemory
+      tags: [memories]
+      summary: Create a memory card
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMemoryRequest"
+      responses:
+        "201":
+          description: Created memory card
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoryCard"
+
+  /memories/{memoryId}:
+    get:
+      operationId: getMemory
+      tags: [memories]
+      summary: Get a memory card
+      parameters:
+        - name: memoryId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Memory card
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoryCard"
+    put:
+      operationId: updateMemory
+      tags: [memories]
+      summary: Update a memory card
+      parameters:
+        - name: memoryId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMemoryRequest"
+      responses:
+        "200":
+          description: Updated memory card
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoryCard"
+    delete:
+      operationId: deleteMemory
+      tags: [memories]
+      summary: Delete a memory card
+      parameters:
+        - name: memoryId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /ai/chat:
+    post:
+      operationId: aiChat
+      tags: [ai]
+      summary: Send a chat message to AI with relevant memories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatRequest"
+      responses:
+        "200":
+          description: AI response with retrieved memories
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatResponse"
+
+  /ai/memories/retrieve:
+    post:
+      operationId: retrieveMemories
+      tags: [ai]
+      summary: Retrieve relevant memories for a context
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RetrieveMemoriesRequest"
+      responses:
+        "200":
+          description: Retrieved memories with relevance scores
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RetrieveMemoriesResponse"
+
+  /chat/messages:
+    get:
+      operationId: getChatMessages
+      tags: [ai]
+      summary: Get chat message history
+      parameters:
+        - name: folderId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Chat messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatMessage"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Folder:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        parentId:
+          type: integer
+          nullable: true
+        libraryType:
+          type: string
+          enum: [memory, plan, material]
+        createdAt:
+          type: string
+          format: date-time
+        children:
+          type: array
+          items:
+            $ref: "#/components/schemas/Folder"
+        memoryCount:
+          type: integer
+      required:
+        - id
+        - name
+        - libraryType
+        - createdAt
+
+    CreateFolderRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        parentId:
+          type: integer
+          nullable: true
+        libraryType:
+          type: string
+          enum: [memory, plan, material]
+      required:
+        - name
+        - libraryType
+
+    UpdateFolderRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        parentId:
+          type: integer
+          nullable: true
+
+    MemoryCard:
+      type: object
+      properties:
+        id:
+          type: integer
+        folderId:
+          type: integer
+          nullable: true
+        content:
+          type: string
+        title:
+          type: string
+        emotionWeight:
+          type: number
+          format: float
+        emotionLabel:
+          type: string
+          enum: [calm, excited, positive, negative, neutral]
+        keywords:
+          type: array
+          items:
+            type: string
+        libraryType:
+          type: string
+          enum: [memory, plan, material]
+        operatorType:
+          type: string
+          enum: [user, ai]
+        isImportant:
+          type: boolean
+        priority:
+          type: integer
+          nullable: true
+        dueDate:
+          type: string
+          format: date-time
+          nullable: true
+        isCompleted:
+          type: boolean
+          nullable: true
+        fileType:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - content
+        - title
+        - emotionWeight
+        - emotionLabel
+        - keywords
+        - libraryType
+        - operatorType
+        - isImportant
+        - createdAt
+        - updatedAt
+
+    CreateMemoryRequest:
+      type: object
+      properties:
+        content:
+          type: string
+        title:
+          type: string
+        folderId:
+          type: integer
+          nullable: true
+        libraryType:
+          type: string
+          enum: [memory, plan, material]
+        keywords:
+          type: array
+          items:
+            type: string
+        emotionWeight:
+          type: number
+          format: float
+          nullable: true
+        isImportant:
+          type: boolean
+        priority:
+          type: integer
+          nullable: true
+        dueDate:
+          type: string
+          format: date-time
+          nullable: true
+        fileType:
+          type: string
+          nullable: true
+      required:
+        - content
+        - title
+        - libraryType
+
+    UpdateMemoryRequest:
+      type: object
+      properties:
+        content:
+          type: string
+        title:
+          type: string
+        folderId:
+          type: integer
+          nullable: true
+        keywords:
+          type: array
+          items:
+            type: string
+        emotionWeight:
+          type: number
+          format: float
+          nullable: true
+        isImportant:
+          type: boolean
+        priority:
+          type: integer
+          nullable: true
+        dueDate:
+          type: string
+          format: date-time
+          nullable: true
+        isCompleted:
+          type: boolean
+          nullable: true
+
+    ChatRequest:
+      type: object
+      properties:
+        message:
+          type: string
+        folderId:
+          type: integer
+          nullable: true
+        useMemories:
+          type: boolean
+      required:
+        - message
+
+    ChatResponse:
+      type: object
+      properties:
+        reply:
+          type: string
+        usedMemories:
+          type: array
+          items:
+            $ref: "#/components/schemas/MemoryCard"
+        newMemoryCreated:
+          type: boolean
+        messageId:
+          type: integer
+      required:
+        - reply
+        - usedMemories
+        - newMemoryCreated
+
+    RetrieveMemoriesRequest:
+      type: object
+      properties:
+        context:
+          type: string
+        topK:
+          type: integer
+          default: 5
+        folderId:
+          type: integer
+          nullable: true
+      required:
+        - context
+
+    RetrieveMemoriesResponse:
+      type: object
+      properties:
+        memories:
+          type: array
+          items:
+            type: object
+            properties:
+              memoryId:
+                type: integer
+              content:
+                type: string
+              title:
+                type: string
+              relevanceScore:
+                type: number
+              emotionWeight:
+                type: number
+            required:
+              - memoryId
+              - content
+              - title
+              - relevanceScore
+              - emotionWeight
+      required:
+        - memories
+
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        folderId:
+          type: integer
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - role
+        - content
+        - createdAt
